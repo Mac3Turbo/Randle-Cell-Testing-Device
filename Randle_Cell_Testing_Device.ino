@@ -261,8 +261,6 @@ void run_sweep() {
   writeData(CONTROL_REGISTRY, 0xA0);
 }
 
-
-
 //Function responsible for programing the registry through the I2C protocol
 void writeData(int address, int data) {
   Wire.beginTransmission(SLAVE_ADDRESS);
@@ -271,7 +269,6 @@ void writeData(int address, int data) {
   Wire.endTransmission();
   delay(10);
 }
-
 
 //Read the data that is sitting in the registries using I2C protocol
 int readData(int address) {
