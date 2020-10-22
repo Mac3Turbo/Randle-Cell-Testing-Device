@@ -118,10 +118,8 @@ void setup() {
 }
 
 void loop() {
-  delay(2500);
-
-  measureTemperature();
-
+  delay(5000);
+  
   if (Serial.available() > 0) {
     state = Serial.read();
     switch (state) {
