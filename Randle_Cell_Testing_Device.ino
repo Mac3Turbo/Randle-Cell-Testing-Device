@@ -55,12 +55,12 @@
 #include <Wire.h>
 
 #define SLAVE_ADDRESS 0x0D //When the device is powered up, it has a default serial bus address, 0001101 (0x0D)
-#define ADDRESS_POINTER 0xB0 //Address pointer
+#define ADDRESS_POINTER 0xB0 //Pulls up a specific location in the registry
 
 //Assign each constant to its corresponding registry address from the registry map.
 
-#define CONTROL_REGISTRY 0x80 //D15 to D8 Control registry
-//#define CONTROL_REGISTRY_R2 0x81 //D7 to D0
+#define CONTROL_REGISTRY 0x80 //D15 to D8 Control registry. Commands get sent here
+//#define CONTROL_REGISTRY_R2 0x81 //D7 to D0 Second registry address
 
 #define START_FREQUENCY_R1 0x82 //D23 to D16 Start Frequency 
 #define START_FREQUENCY_R2 0x83 //D15 to D8
@@ -93,14 +93,14 @@ int internal_resistor = 2;
 //set up initial constants
 const float MCLK = 16.776 * pow(10, 6); // AD5933 Internal Clock Speed @ 16.776 MHz
 
-const int start_frequency = 10000; //Start Frequency @ 1950 Hz
+const int start_frequency = 10000; //Start frequency @ 1950 Hz
 const int increase_frequency = 300; //Increase in frequency @ 975 Hz
 const int number_increments = 100; //Number of increments of frequency - max 511
 
 char state;
 
 //When measuring outside of ZMIN, 4.9 kΩ and ZMAX, 47.2 kΩ, these values need to change. **See table 1 on datasheet to determine range**
-//const int PGA_gain = 1; //PGA gain allows the user to amplify the response signal into the ADC by a multiplication factor of ×5 or ×1. Automatically at 1
+//const int PGA_gain = 1; //PGA gain allows the user to amplify the response signal into the ADC by a multiplication factor of ×5 or ×1. Automatically set to 1
 //const int v_out = 2; //Output voltage range set at 2V p-p
 //const int s_time = 1; //settling time is 1 ms worst case
 
@@ -111,7 +111,7 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(internal_resistor, INPUT);
-  digitalWrite(internal_resistor, LOW);//high selects 20 Ohm gain setting resistor and low selects 100k Ohm gain setting resistor
+  digitalWrite(internal_resistor, LOW);//High selects 20 Ohm gain setting resistor and low selects 100k Ohm gain setting resistor
 
   program_registry(); //The first step is to program the registry
 
@@ -126,11 +126,11 @@ void loop() {
     state = Serial.read();
     switch (state) {
 
-      case 'T': //type T in the serial monitor to measure temperature
+      case 'T': //Type T in the serial monitor to measure temperature
         measureTemperature();
         break;
 
-      case 'R': //type R in the serial monitor to run sweep
+      case 'R': //Type R in the serial monitor to run sweep
         run_sweep();
         delay(1000);
         break;
@@ -138,10 +138,10 @@ void loop() {
   }
 }
 
-//Write each command to its corresponding registry? I think. make sure to check that the
+//Write each command to the registry
 void program_registry() {
 
-  //reset the part. Sets it to range 1 at ZMIN, 4.9 kΩ and ZMAX, 47.2 kΩ with a v_out at 1.98
+  //Reset the part. Sets it to range 1 at ZMIN, 4.9 kΩ and ZMAX, 47.2 kΩ with a v_out at 1.98
   writeData(CONTROL_REGISTRY, 0x01);
 
   //program the start frequency
