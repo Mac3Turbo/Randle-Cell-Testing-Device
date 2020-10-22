@@ -2,7 +2,7 @@
 //2020 iGEM Calgary Electrochemical Impedance Spectroscopy
 //
 //This code is designed for the Pmod Ia board by Digilent. 
-//Using the AD5933 Impedance Analyser Integrated Circuit
+//Using the AD5933 Impedance Analyser Integrated Circuit by Analog
 //Refer to AD5933 Datasheet for more information
 //
 //By Mackenzie Sampson and Randy Moore
