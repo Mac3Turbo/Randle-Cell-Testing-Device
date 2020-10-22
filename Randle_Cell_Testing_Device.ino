@@ -7,46 +7,50 @@
 //
 //By Mackenzie Sampson and Randy Moore
 //
+//
 //****Code is set to export data to the serial monitor in .CSV format*****
 // Uncomment the Serial.print() lines for general troubleshooting
+//
+//
+//
 
 //Convert the hex codes into binary and use this table to determine the command sent to the control registry.
 // "D" refers to the corresponding bit in the registry
 //
 //   Table 9. Control Register Map (D15 to D12)
 //   D15 D14 D13 D12 Function
-//   0 0 0 0 No operation
-//   0 0 0 1 Initialize with start frequency
-//   0 0 1 0 Start frequency sweep
-//   0 0 1 1 Increment frequency
-//   0 1 0 0 Repeat frequency
-//   1 0 0 0 No operation
-//   1 0 0 1 Measure temperature
-//   1 0 1 0 Power-down mode
-//   1 0 1 1 Standby mode
-//   1 1 0 0 No operation
-//   1 1 0 1 No operation
+//   0    0   0   0  No operation
+//   0    0   0   1  Initialize with start frequency
+//   0    0   1   0  Start frequency sweep
+//   0    0   1   1  Increment frequency
+//   0    1   0   0  Repeat frequency
+//   1    0   0   0  No operation
+//   1    0   0   1  Measure temperature
+//   1    0   1   0  Power-down mode
+//   1    0   1   1  Standby mode
+//   1    1   0   0  No operation
+//   1    1   0   1  No operation
 
 //   Table 10. Control Register Map (D10 to D9)
 //   D10 D9 Range No. Output Voltage Range
-//   0 0 1 2.0 V p-p typical
-//   0 1 4 200 mV p-p typical
-//   1 0 3 400 mV p-p typical
-//   1 1 2 1.0 V p-p typical
+//   0   0    1        2.0 V p-p typical
+//   0   1    4        200 mV p-p typical
+//   1   0    3        400 mV p-p typical
+//   1   1    2        1.0 V p-p typical
 
 //   Table 11. Control Register Map (D11, D8 to D0)
 //   Bits Description
-//   D11 No operation
-//   D8 PGA gain; 0 = ×5, 1 = ×1
-//   D7 Reserved; set to 0
-//   D6 Reserved; set to 0
-//   D5 Reserved; set to 0
-//   D4 Reset
-//   D3 External system clock; set to 1
-//   Internal system clock; set to 0
-//   D2 Reserved; set to 0
-//   D1 Reserved; set to 0
-//   D0 Reserved; set to 0
+//   D11  No operation
+//   D8   PGA gain; 0 = ×5, 1 = ×1
+//   D7   Reserved; set to 0
+//   D6   Reserved; set to 0
+//   D5   Reserved; set to 0
+//   D4   Reset
+//   D3   External system clock; set to 1
+//        Internal system clock; set to 0
+//   D2   Reserved; set to 0
+//   D1   Reserved; set to 0
+//   D0   Reserved; set to 0
 
 #include <Wire.h>
 
@@ -83,7 +87,7 @@
 #define IMAGINARY_DATA_R1 0x96 //D15 to D8 Imaginary Data
 #define IMAGINARY_DATA_R2 0x97 //D7 to D0
 
-//the internal gain setting resistor at pin 2
+//the internal gain setting resistor at pin 2 *Specific to the Pmodl Ia board*
 int internal_resistor = 2;
 
 //set up initial constants
@@ -95,7 +99,7 @@ const int number_increments = 100; //Number of increments of frequency - max 511
 
 char state;
 
-//Measuring outside of ZMIN, 4.9 kΩ and ZMAX, 47.2 kΩ requires these values to change
+//When measuring outside of ZMIN, 4.9 kΩ and ZMAX, 47.2 kΩ, these values need to change. **See table 1 on datasheet to determine range**
 //const int PGA_gain = 1; //PGA gain allows the user to amplify the response signal into the ADC by a multiplication factor of ×5 or ×1. Automatically at 1
 //const int v_out = 2; //Output voltage range set at 2V p-p
 //const int s_time = 1; //settling time is 1 ms worst case
@@ -138,7 +142,7 @@ void loop() {
 void program_registry() {
 
   //reset the part. Sets it to range 1 at ZMIN, 4.9 kΩ and ZMAX, 47.2 kΩ with a v_out at 1.98
-  writeData(CONTROL_REGISTRY, 0x10);///////////////////changed from 0x10
+  writeData(CONTROL_REGISTRY, 0x01);
 
   //program the start frequency
   writeData(START_FREQUENCY_R1, getFrequency(start_frequency, 1));
@@ -155,8 +159,8 @@ void program_registry() {
   writeData(NUMBER_INCREMENTS_R2, (number_increments & 0x0000FF));
 
   //program the delay in the measurements. The worst case is at maximum frequency.
-  writeData(NUMBER_SETTLING_CYCLES_R1, 0x00);/////////////0x00 orrrr 07
-  writeData(NUMBER_SETTLING_CYCLES_R1, 0x0C);/////////////0x0C orrrr FF
+  writeData(NUMBER_SETTLING_CYCLES_R1, 0x00);// Also see 0x07
+  writeData(NUMBER_SETTLING_CYCLES_R1, 0x0C);// Also see 0xFF
 
   //initialize the system
   writeData(CONTROL_REGISTRY, 0x11);
